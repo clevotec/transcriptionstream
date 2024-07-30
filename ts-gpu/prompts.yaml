@@ -1,96 +1,95 @@
-summarization_prompt = f"""
-You are tasked with summarizing a transcription. The transcription is provided below:
+summarization_prompt: >
+  You are tasked with summarizing a transcription. The transcription is provided below:
 
-<transcription>
-{transcription_text}
-</transcription>
+  <transcription>
+  {transcription_text}
+  </transcription>
 
-Your goal is to create a comprehensive summary of this transcription, extracting key information and organizing it into specific categories. Please provide your summary using the following format and Markdown for proper formatting:
+  Your goal is to create a comprehensive summary of this transcription, extracting key information and organizing it into specific categories. Please provide your summary using the following format and Markdown for proper formatting:
 
-1. Speakers: List the names or identifiers of the speaking parties.
-2. Topics: Enumerate the main topics discussed in the transcription.
-3. Key Ideas: Highlight any significant ideas or concepts mentioned.
-4. Dates: Note any dates mentioned and what they correspond to.
-5. Locations: List any locations referenced in the transcription.
-6. Action Items: Identify any action items discussed and who is responsible for them. Represent them as a task list using Markdown syntax.
-7. Summary: Provide an overall summary of the transcription's content.
+  1. Speakers: List the names or identifiers of the speaking parties.
+  2. Topics: Enumerate the main topics discussed in the transcription.
+  3. Key Ideas: Highlight any significant ideas or concepts mentioned.
+  4. Dates: Note any dates mentioned and what they correspond to.
+  5. Locations: List any locations referenced in the transcription.
+  6. Action Items: Identify any action items discussed and who is responsible for them. Represent them as a task list using Markdown syntax.
+  7. Summary: Provide an overall summary of the transcription's content.
 
-To extract and organize the information:
-- Carefully read through the entire transcription.
-- Pay attention to introductions or mentions of speakers' names and roles.  It is crucial that you identify the speakers correctly so pay close attention to these details and ensure they are listed accurately. If you are unable to confidently identify a speaker, leave them unidentified in your response.
-- Identify recurring themes or subjects to determine the main topics.
-- Note any unique or innovative ideas presented by the speakers.
-- Be precise when listing dates, ensuring you capture what each date refers to.
-- Include both specific locations (e.g., cities, countries) and general locations (e.g., "the office," "our headquarters") if mentioned.
-- For action items, clearly state the task and the person assigned to it as a list of TODO items with checkboxes in front of each.
+  To extract and organize the information:
+  - Carefully read through the entire transcription.
+  - Pay attention to introductions or mentions of speakers' names and roles.  It is crucial that you identify the speakers correctly so pay close attention to these details and ensure they are listed accurately. If you are unable to confidently identify a speaker, leave them unidentified in your response.
+  - Identify recurring themes or subjects to determine the main topics.
+  - Note any unique or innovative ideas presented by the speakers.
+  - Be precise when listing dates, ensuring you capture what each date refers to.
+  - Include both specific locations (e.g., cities, countries) and general locations (e.g., "the office," "our headquarters") if mentioned.
+  - For action items, clearly state the task and the person assigned to it as a list of TODO items with checkboxes in front of each.
 
-When writing the summary:
-- Provide a concise overview of the transcription's main points.
-- Highlight the most important information discussed.
-- Maintain a neutral tone, avoiding personal interpretations or opinions.
-- Ensure the summary gives a clear picture of the transcription's content without unnecessary details.
+  When writing the summary:
+  - Provide a concise overview of the transcription's main points.
+  - Highlight the most important information discussed.
+  - Maintain a neutral tone, avoiding personal interpretations or opinions.
+  - Ensure the summary gives a clear picture of the transcription's content without unnecessary details.
 
-After completing your summary, review it to ensure all required sections are included and properly formatted in Markdown. Your output should begin with the "Speakers" section and end with the "Summary" section.
+  After completing your summary, review it to ensure all required sections are included and properly formatted in Markdown. Your output should begin with the "Speakers" section and end with the "Summary" section.
 
-Present your final output in the following structure:
+  Present your final output in the following structure:
 
-<summary>
-# Meeting Notes
+  <summary>
+  # Meeting Notes
 
-## Speakers
-[List speakers here]
+  ## Speakers
+  [List speakers here]
 
-## Topics
-[List topics here]
+  ## Topics
+  [List topics here]
 
-## Key Ideas
-[List key ideas here]
+  ## Key Ideas
+  [List key ideas here]
 
-## Dates
-[List dates here]
+  ## Dates
+  [List dates here]
 
-## Locations
-[List locations here]
+  ## Locations
+  [List locations here]
 
-## Action Items
-[List action items here]
+  ## Action Items
+  [List action items here]
 
-## Summary
-[Provide overall summary here]
-</summary>
+  ## Summary
+  [Provide overall summary here]
+  </summary>
 
-Here is an example of a good quality result:
-<example>
-# Meeting Notes
+  Here is an example of a good quality result:
+  <example>
+  # Meeting Notes
 
-## Speakers
-- Speaker 0 = Sarah (Team Lead)
-- Speaker 1 = Alex (Project Manager)
-- Speaker 2 = Raj (Developer)
+  ## Speakers
+  - Speaker 0 = Sarah (Team Lead)
+  - Speaker 1 = Alex (Project Manager)
+  - Speaker 2 = Raj (Developer)
 
-## Topics
-- Project status update
-- Budget review
-- Team building activities
+  ## Topics
+  - Project status update
+  - Budget review
+  - Team building activities
 
-## Key Ideas
-- Review of current project milestones
-- Discussion of budget constraints and solutions
-- Proposal for monthly team building events
-- Emphasis on improving inter-departmental communication
+  ## Key Ideas
+  - Review of current project milestones
+  - Discussion of budget constraints and solutions
+  - Proposal for monthly team building events
+  - Emphasis on improving inter-departmental communication
 
-## Dates
-Next team building event scheduled for July 15th
+  ## Dates
+  Next team building event scheduled for July 15th
 
-## Locations
-Main conference room mentioned for future meetings
+  ## Locations
+  Main conference room mentioned for future meetings
 
-## Action Items
-- [ ] Raj to prepare detailed report on current sprint progress
-- [ ] Alex to draft budget revision proposal
-- [ ] Sarah to coordinate with HR about team building activities
+  ## Action Items
+  - [ ] Raj to prepare detailed report on current sprint progress
+  - [ ] Alex to draft budget revision proposal
+  - [ ] Sarah to coordinate with HR about team building activities
 
-## Summary
-Sarah opens the meeting by reviewing the project's current status. Alex presents the budget situation, highlighting areas of concern. Raj suggests ways to optimize resource allocation. The team discusses the importance of regular team building activities, with Sarah proposing monthly events. The meeting concludes with a discussion on improving communication between departments, and specific action items are assigned to each team member.
-</example>
-"""
+  ## Summary
+  Sarah opens the meeting by reviewing the project's current status. Alex presents the budget situation, highlighting areas of concern. Raj suggests ways to optimize resource allocation. The team discusses the importance of regular team building activities, with Sarah proposing monthly events. The meeting concludes with a discussion on improving communication between departments, and specific action items are assigned to each team member.
+  </example>
