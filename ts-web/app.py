@@ -168,6 +168,7 @@ def upload_transcribe():
     if 'file' not in request.files:
         return redirect(request.url)
     file = request.files['file']
+    media_type = request.form.get('mediaType', 'video')  # Default to 'video' if not specified
     if file.filename == '':
         return redirect(request.url)
     if file and allowed_file(file.filename):
@@ -177,22 +178,22 @@ def upload_transcribe():
         
         attendees = []
         if is_video_file(filename):
-            logger.info(f"Processing video file for attendees: {filename}")
+            logger.info(f"Processing {media_type} file for attendees: {filename}")
             attendees = process_video_for_attendees(file_path)
             audio_filename = f"{os.path.splitext(filename)[0]}.wav"
             audio_path = os.path.join(app.config['UPLOAD_FOLDER'], 'transcribe', audio_filename)
             if extract_audio(file_path, audio_path):
                 os.remove(file_path)  # Remove the original video file
-                message = "Video file processed and audio extracted successfully for Transcribe!"
+                message = f"{media_type.capitalize()} file processed and audio extracted successfully for Transcribe!"
                 if attendees:
                     message += f" Found {len(attendees)} attendees."
                 logger.info(message)
                 return render_template('upload.html', message=message, attendees=attendees)
             else:
-                logger.error(f"Error processing video file: {filename}")
-                return render_template('upload.html', message="Error processing video file. Please try again.")
+                logger.error(f"Error processing {media_type} file: {filename}")
+                return render_template('upload.html', message=f"Error processing {media_type} file. Please try again.")
         
-        return render_template('upload.html', message="File uploaded successfully to Transcribe!")
+        return render_template('upload.html', message=f"{media_type.capitalize()} file uploaded successfully to Transcribe!")
     return render_template('upload.html', message="Invalid file type. Please upload an allowed audio or video file.")
 
 @app.route('/upload_diarize', methods=['POST'])
@@ -200,6 +201,7 @@ def upload_diarize():
     if 'file' not in request.files:
         return redirect(request.url)
     file = request.files['file']
+    media_type = request.form.get('mediaType', 'video')  # Default to 'video' if not specified
     if file.filename == '':
         return redirect(request.url)
     if file and allowed_file(file.filename):
@@ -209,19 +211,22 @@ def upload_diarize():
         
         attendees = []
         if is_video_file(filename):
+            logger.info(f"Processing {media_type} file for attendees: {filename}")
             attendees = process_video_for_attendees(file_path)
             audio_filename = f"{os.path.splitext(filename)[0]}.wav"
             audio_path = os.path.join(app.config['UPLOAD_FOLDER'], 'diarize', audio_filename)
             if extract_audio(file_path, audio_path):
                 os.remove(file_path)  # Remove the original video file
-                message = "Video file processed and audio extracted successfully for Diarize!"
+                message = f"{media_type.capitalize()} file processed and audio extracted successfully for Diarize!"
                 if attendees:
                     message += f" Found {len(attendees)} attendees."
+                logger.info(message)
                 return render_template('upload.html', message=message, attendees=attendees)
             else:
-                return render_template('upload.html', message="Error processing video file. Please try again.")
+                logger.error(f"Error processing {media_type} file: {filename}")
+                return render_template('upload.html', message=f"Error processing {media_type} file. Please try again.")
         
-        return render_template('upload.html', message="File uploaded successfully to Diarize!")
+        return render_template('upload.html', message=f"{media_type.capitalize()} file uploaded successfully to Diarize!")
     return render_template('upload.html', message="Invalid file type. Please upload an allowed audio or video file.")
 
 
