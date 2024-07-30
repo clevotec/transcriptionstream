@@ -60,8 +60,8 @@ def find_attendee_frame(video_path, interval=5):
             best_frame = frame
             best_names = set(names)
         
-        # If we haven't found any names in the first minute, break
-        if t > 60 and max_names == 0:
+        # If we haven't found any names in the first 5 minutes, break
+        if t > 5*60 and max_names == 0:
             break
 
     video.close()
