@@ -3,6 +3,7 @@ from werkzeug.utils import secure_filename
 import os
 import shutil
 from datetime import datetime
+import ffmpeg
 
 app = Flask(__name__)
 # Use the TS_WEB_SECRET_KEY environment variable as the secret key, and the fallback
@@ -10,7 +11,7 @@ app.secret_key = os.environ.get('TS_WEB_SECRET_KEY', 'some_secret_key')
 
 TRANSCRIBED_FOLDER = '/transcriptionstream/transcribed'
 UPLOAD_FOLDER = '/transcriptionstream/incoming'
-ALLOWED_EXTENSIONS = set(['mp3', 'wav', 'ogg', 'flac'])
+ALLOWED_EXTENSIONS = set(['mp3', 'wav', 'ogg', 'flac', 'mkv', 'mp4', 'avi', 'mov', 'wmv'])
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -19,6 +20,24 @@ session_start_time = datetime.now()
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def is_video_file(filename):
+    video_extensions = set(['mkv', 'mp4', 'avi', 'mov', 'wmv'])
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in video_extensions
+
+def extract_audio(input_file, output_file):
+    try:
+        (
+            ffmpeg
+            .input(input_file)
+            .output(output_file, acodec='pcm_s16le', ar=16000, ac=1)
+            .overwrite_output()
+            .run(capture_stdout=True, capture_stderr=True)
+        )
+        return True
+    except ffmpeg.Error as e:
+        print(f"Error extracting audio: {e.stderr.decode()}")
+        return False
 
 
 @app.route('/')
@@ -85,10 +104,22 @@ def upload_transcribe():
     file = request.files['file']
     if file.filename == '':
         return redirect(request.url)
-    if file:
+    if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], 'transcribe', filename))
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'transcribe', filename)
+        file.save(file_path)
+        
+        if is_video_file(filename):
+            audio_filename = f"{os.path.splitext(filename)[0]}.wav"
+            audio_path = os.path.join(app.config['UPLOAD_FOLDER'], 'transcribe', audio_filename)
+            if extract_audio(file_path, audio_path):
+                os.remove(file_path)  # Remove the original video file
+                return render_template('upload.html', message="Video file processed and audio extracted successfully for Transcribe!")
+            else:
+                return render_template('upload.html', message="Error processing video file. Please try again.")
+        
         return render_template('upload.html', message="File uploaded successfully to Transcribe!")
+    return render_template('upload.html', message="Invalid file type. Please upload an allowed audio or video file.")
 
 @app.route('/upload_diarize', methods=['POST'])
 def upload_diarize():
@@ -97,10 +128,22 @@ def upload_diarize():
     file = request.files['file']
     if file.filename == '':
         return redirect(request.url)
-    if file:
+    if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], 'diarize', filename))
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'diarize', filename)
+        file.save(file_path)
+        
+        if is_video_file(filename):
+            audio_filename = f"{os.path.splitext(filename)[0]}.wav"
+            audio_path = os.path.join(app.config['UPLOAD_FOLDER'], 'diarize', audio_filename)
+            if extract_audio(file_path, audio_path):
+                os.remove(file_path)  # Remove the original video file
+                return render_template('upload.html', message="Video file processed and audio extracted successfully for Diarize!")
+            else:
+                return render_template('upload.html', message="Error processing video file. Please try again.")
+        
         return render_template('upload.html', message="File uploaded successfully to Diarize!")
+    return render_template('upload.html', message="Invalid file type. Please upload an allowed audio or video file.")
 
 
 @app.route('/check_alert', methods=['GET'])
