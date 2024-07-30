@@ -105,7 +105,7 @@
         <div id="transcription" style="text-align: center;">
             <form id="transcribeForm" action="/upload_transcribe" method="POST" enctype="multipart/form-data" class="dropzone">
                 <label for="transcribeInput">Upload for Transcribe:</label>
-                <input type="file" name="file" id="transcribeInput" required accept="audio/*">
+                <input type="file" name="file" id="transcribeInput" required accept="audio/*,video/*">
                 <button type="submit" class="flat-button">Upload</button>
                 <div class="progress-bar">
                     <span class="progress-bar-fill" style="width: 0%;"></span>
@@ -113,7 +113,7 @@
             </form>
             <form id="diarizeForm" action="/upload_diarize" method="POST" enctype="multipart/form-data" class="dropzone">
                 <label for="diarizeInput">Upload for Diarize:</label>
-                <input type="file" name="file" id="diarizeInput" required accept="audio/*">
+                <input type="file" name="file" id="diarizeInput" required accept="audio/*,video/*">
                 <button type="submit" class="flat-button">Upload</button>
                 <div class="progress-bar">
                     <span class="progress-bar-fill" style="width: 0%;"></span>
