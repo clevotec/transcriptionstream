@@ -48,7 +48,7 @@ def extract_audio(input_file, output_file):
         print(f"Error extracting audio: {e.stderr.decode()}")
         return False
 
-def find_attendee_frame(video_path, interval=5):
+def find_attendee_frame(video_path, interval=2):
     """Find the frame with the most potential attendee names."""
     logger.info(f"Starting attendee detection for video: {video_path}")
     video = VideoFileClip(video_path)
