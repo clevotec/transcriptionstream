@@ -8,6 +8,11 @@ import cv2
 import pytesseract
 from moviepy.editor import VideoFileClip
 import re
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 # Use the TS_WEB_SECRET_KEY environment variable as the secret key, and the fallback
@@ -45,6 +50,7 @@ def extract_audio(input_file, output_file):
 
 def find_attendee_frame(video_path, interval=5):
     """Find the frame with the most potential attendee names."""
+    logger.info(f"Starting attendee detection for video: {video_path}")
     video = VideoFileClip(video_path)
     max_names = 0
     best_frame = None
@@ -55,6 +61,8 @@ def find_attendee_frame(video_path, interval=5):
         text = process_frame(frame)
         names = extract_names(text)
         
+        logger.info(f"Frame at {t}s: Found {len(names)} potential names")
+        
         if len(names) > max_names:
             max_names = len(names)
             best_frame = frame
@@ -62,9 +70,11 @@ def find_attendee_frame(video_path, interval=5):
         
         # If we haven't found any names in the first 5 minutes, break
         if t > 5*60 and max_names == 0:
+            logger.info("No names found in first 5 minutes, stopping search")
             break
 
     video.close()
+    logger.info(f"Attendee detection complete. Found {len(best_names)} potential attendees")
     return best_frame, best_names
 
 def process_frame(frame):
@@ -82,16 +92,16 @@ def extract_names(text):
 
 def process_video_for_attendees(video_path):
     """Process the video to extract attendee names."""
-    print("Searching for the frame with attendee names...")
+    logger.info(f"Starting video processing for attendees: {video_path}")
     best_frame, attendees = find_attendee_frame(video_path)
     
     if not attendees:
-        print("No attendees found. The script might need adjusting for this particular video format.")
+        logger.warning("No attendees found. The script might need adjusting for this particular video format.")
         return []
 
-    print(f"\nFound {len(attendees)} attendees:")
+    logger.info(f"Found {len(attendees)} attendees:")
     for name in sorted(attendees):
-        print(name)
+        logger.info(f"  - {name}")
 
     return list(attendees)
 
@@ -167,6 +177,7 @@ def upload_transcribe():
         
         attendees = []
         if is_video_file(filename):
+            logger.info(f"Processing video file for attendees: {filename}")
             attendees = process_video_for_attendees(file_path)
             audio_filename = f"{os.path.splitext(filename)[0]}.wav"
             audio_path = os.path.join(app.config['UPLOAD_FOLDER'], 'transcribe', audio_filename)
@@ -175,8 +186,10 @@ def upload_transcribe():
                 message = "Video file processed and audio extracted successfully for Transcribe!"
                 if attendees:
                     message += f" Found {len(attendees)} attendees."
+                logger.info(message)
                 return render_template('upload.html', message=message, attendees=attendees)
             else:
+                logger.error(f"Error processing video file: {filename}")
                 return render_template('upload.html', message="Error processing video file. Please try again.")
         
         return render_template('upload.html', message="File uploaded successfully to Transcribe!")
