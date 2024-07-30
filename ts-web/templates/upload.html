@@ -12,6 +12,21 @@
             cursor: pointer;
             text-align: center;
         }
+        .progress-bar {
+            width: 100%;
+            background-color: #f0f0f0;
+            padding: 3px;
+            border-radius: 3px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, .2);
+            display: none;
+        }
+        .progress-bar-fill {
+            display: block;
+            height: 22px;
+            background-color: #659cef;
+            border-radius: 3px;
+            transition: width 500ms ease-in-out;
+        }
     </style>
     <script>
         {% if redirect %}
@@ -23,6 +38,8 @@
         function setupDropzone(formId, inputId) {
             const form = document.getElementById(formId);
             const input = document.getElementById(inputId);
+            const progressBar = form.querySelector('.progress-bar');
+            const progressBarFill = form.querySelector('.progress-bar-fill');
             
             form.addEventListener('dragover', function(e) {
                 e.preventDefault();
@@ -39,6 +56,34 @@
                 e.preventDefault();
                 form.classList.remove('hover');
                 input.files = e.dataTransfer.files;
+            });
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                const xhr = new XMLHttpRequest();
+                
+                xhr.open(form.method, form.action, true);
+                
+                xhr.upload.onprogress = function(e) {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        progressBarFill.style.width = percentComplete + '%';
+                        progressBarFill.textContent = Math.round(percentComplete) + '%';
+                    }
+                };
+                
+                xhr.onloadstart = function() {
+                    progressBar.style.display = 'block';
+                };
+                
+                xhr.onloadend = function() {
+                    setTimeout(function() {
+                        window.location.href = '/';
+                    }, 1000);
+                };
+                
+                xhr.send(formData);
             });
         }
         
@@ -62,11 +107,17 @@
                 <label for="transcribeInput">Upload for Transcribe:</label>
                 <input type="file" name="file" id="transcribeInput" required accept="audio/*">
                 <button type="submit" class="flat-button">Upload</button>
+                <div class="progress-bar">
+                    <span class="progress-bar-fill" style="width: 0%;"></span>
+                </div>
             </form>
             <form id="diarizeForm" action="/upload_diarize" method="POST" enctype="multipart/form-data" class="dropzone">
                 <label for="diarizeInput">Upload for Diarize:</label>
                 <input type="file" name="file" id="diarizeInput" required accept="audio/*">
                 <button type="submit" class="flat-button">Upload</button>
+                <div class="progress-bar">
+                    <span class="progress-bar-fill" style="width: 0%;"></span>
+                </div>
             </form>
             {% if message %}
                 <p>{{ message }}</p>
