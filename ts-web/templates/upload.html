@@ -106,6 +106,12 @@
             <form id="transcribeForm" action="/upload_transcribe" method="POST" enctype="multipart/form-data" class="dropzone">
                 <label for="transcribeInput">Upload for Transcribe:</label>
                 <input type="file" name="file" id="transcribeInput" required accept="audio/*,video/*,.mkv,.mp4,.avi,.mov,.wmv">
+                <select name="mediaType" id="transcribeMediaType">
+                    <option value="video" selected>Video</option>
+                    <option value="meeting">Meeting</option>
+                    <option value="recording">Recording</option>
+                    <option value="other">Other</option>
+                </select>
                 <button type="submit" class="flat-button">Upload</button>
                 <div class="progress-bar">
                     <span class="progress-bar-fill" style="width: 0%;"></span>
@@ -114,6 +120,12 @@
             <form id="diarizeForm" action="/upload_diarize" method="POST" enctype="multipart/form-data" class="dropzone">
                 <label for="diarizeInput">Upload for Diarize:</label>
                 <input type="file" name="file" id="diarizeInput" required accept="audio/*,video/*,.mkv,.mp4,.avi,.mov,.wmv">
+                <select name="mediaType" id="diarizeMediaType">
+                    <option value="video" selected>Video</option>
+                    <option value="meeting">Meeting</option>
+                    <option value="recording">Recording</option>
+                    <option value="other">Other</option>
+                </select>
                 <button type="submit" class="flat-button">Upload</button>
                 <div class="progress-bar">
                     <span class="progress-bar-fill" style="width: 0%;"></span>
