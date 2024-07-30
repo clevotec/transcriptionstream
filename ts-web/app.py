@@ -4,6 +4,10 @@ import os
 import shutil
 from datetime import datetime
 import ffmpeg
+import cv2
+import pytesseract
+from moviepy.editor import VideoFileClip
+import re
 
 app = Flask(__name__)
 # Use the TS_WEB_SECRET_KEY environment variable as the secret key, and the fallback
@@ -38,6 +42,58 @@ def extract_audio(input_file, output_file):
     except ffmpeg.Error as e:
         print(f"Error extracting audio: {e.stderr.decode()}")
         return False
+
+def find_attendee_frame(video_path, interval=5):
+    """Find the frame with the most potential attendee names."""
+    video = VideoFileClip(video_path)
+    max_names = 0
+    best_frame = None
+    best_names = set()
+
+    for t in range(0, int(video.duration), interval):
+        frame = video.get_frame(t)
+        text = process_frame(frame)
+        names = extract_names(text)
+        
+        if len(names) > max_names:
+            max_names = len(names)
+            best_frame = frame
+            best_names = set(names)
+        
+        # If we haven't found any names in the first minute, break
+        if t > 60 and max_names == 0:
+            break
+
+    video.close()
+    return best_frame, best_names
+
+def process_frame(frame):
+    """Process a single frame using Tesseract OCR."""
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    text = pytesseract.image_to_string(gray)
+    return text
+
+def extract_names(text):
+    """Extract potential names from the OCR text."""
+    # Adjust this regex pattern based on the naming conventions in your meetings
+    name_pattern = r'\b[A-Z][a-z]+(?:\s[A-Z][a-z]+)+\b'
+    names = re.findall(name_pattern, text)
+    return names
+
+def process_video_for_attendees(video_path):
+    """Process the video to extract attendee names."""
+    print("Searching for the frame with attendee names...")
+    best_frame, attendees = find_attendee_frame(video_path)
+    
+    if not attendees:
+        print("No attendees found. The script might need adjusting for this particular video format.")
+        return []
+
+    print(f"\nFound {len(attendees)} attendees:")
+    for name in sorted(attendees):
+        print(name)
+
+    return list(attendees)
 
 
 @app.route('/')
@@ -109,12 +165,17 @@ def upload_transcribe():
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'transcribe', filename)
         file.save(file_path)
         
+        attendees = []
         if is_video_file(filename):
+            attendees = process_video_for_attendees(file_path)
             audio_filename = f"{os.path.splitext(filename)[0]}.wav"
             audio_path = os.path.join(app.config['UPLOAD_FOLDER'], 'transcribe', audio_filename)
             if extract_audio(file_path, audio_path):
                 os.remove(file_path)  # Remove the original video file
-                return render_template('upload.html', message="Video file processed and audio extracted successfully for Transcribe!")
+                message = "Video file processed and audio extracted successfully for Transcribe!"
+                if attendees:
+                    message += f" Found {len(attendees)} attendees."
+                return render_template('upload.html', message=message, attendees=attendees)
             else:
                 return render_template('upload.html', message="Error processing video file. Please try again.")
         
@@ -133,12 +194,17 @@ def upload_diarize():
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'diarize', filename)
         file.save(file_path)
         
+        attendees = []
         if is_video_file(filename):
+            attendees = process_video_for_attendees(file_path)
             audio_filename = f"{os.path.splitext(filename)[0]}.wav"
             audio_path = os.path.join(app.config['UPLOAD_FOLDER'], 'diarize', audio_filename)
             if extract_audio(file_path, audio_path):
                 os.remove(file_path)  # Remove the original video file
-                return render_template('upload.html', message="Video file processed and audio extracted successfully for Diarize!")
+                message = "Video file processed and audio extracted successfully for Diarize!"
+                if attendees:
+                    message += f" Found {len(attendees)} attendees."
+                return render_template('upload.html', message=message, attendees=attendees)
             else:
                 return render_template('upload.html', message="Error processing video file. Please try again.")
         

@@ -122,6 +122,14 @@
             {% if message %}
                 <p>{{ message }}</p>
             {% endif %}
+            {% if attendees %}
+                <h3>Detected Attendees:</h3>
+                <ul>
+                {% for attendee in attendees %}
+                    <li>{{ attendee }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
         </div>
     </div>
 </body>
