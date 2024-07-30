@@ -4,6 +4,7 @@ import os
 import requests
 import subprocess
 import re
+import yaml
 
 # Check if both a folder path and API base URL were provided as command line arguments
 if len(sys.argv) < 3:
@@ -28,35 +29,24 @@ if not os.path.exists(txt_file_path):
 with open(txt_file_path, 'r', encoding='utf-8') as file:
     transcription_text = file.read()
 
-# The text for the prompt
-prompt_text = f"""
-Summarize the transcription below. Be sure to include pertinent information about the speakers, including name and anything else shared.
-Provide the summary output in the following style
+# Load the summarization_prompt template from prompts.yaml
+with open('prompts.yaml', 'r') as file:
+    prompts = yaml.safe_load(file)
+    # Get the summarization prompt template
+    summarization_prompt_template = prompts['summarization_prompt']
 
-Speakers: names or identifiers of speaking parties
-Topics: topics included in the transcription
-Ideas: any ideas that may have been mentioned
-Dates: dates mentioned and what they correspond to
-Locations: any locations mentioned
-Action Items: any action items
 
-Summary: overall summary of the transcription
-
-The transcription is as follows
-
-{transcription_text}
-
-"""
 # JSON payload
 payload = {
-    "model": "transcriptionstream/transcriptionstream",
-    "prompt": prompt_text,
+    "model": "llama3.1:70b",
+    "prompt": summarization_prompt_template,
     "stream": False,
     "keep_alive": "5s"
 }
 
 # Try to send a GET request to check if the API is running
 try:
+    print("API_BASE_URL: ", api_base_url)
     api_response = requests.get(api_base_url, timeout=5)
     if api_response.status_code == 200 and api_response.text == "Ollama is running":
         print("API endpoint is running.")
