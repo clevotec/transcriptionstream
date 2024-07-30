@@ -99,23 +99,7 @@ def upload_transcribe():
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'transcribe', filename)
         file.save(file_path)
         
-        attendees = []
-        if is_video_file(filename):
-            logger.info(f"Processing video file for attendees: {filename}")
-            attendees = process_video_for_attendees(file_path)
-            audio_filename = f"{os.path.splitext(filename)[0]}.wav"
-            audio_path = os.path.join(app.config['UPLOAD_FOLDER'], 'transcribe', audio_filename)
-            if extract_audio(file_path, audio_path):
-                os.remove(file_path)  # Remove the original video file
-                message = "Video file processed and audio extracted successfully for Transcribe!"
-                if attendees:
-                    message += f" Found {len(attendees)} attendees."
-                logger.info(message)
-                return render_template('upload.html', message=message, attendees=attendees)
-            else:
-                logger.error(f"Error processing video file: {filename}")
-                return render_template('upload.html', message="Error processing video file. Please try again.")
-        
+        logger.info(f"File uploaded successfully for Transcribe: {filename}")
         return render_template('upload.html', message="File uploaded successfully to Transcribe!")
     return render_template('upload.html', message="Invalid file type. Please upload an allowed audio or video file.")
 
@@ -131,20 +115,7 @@ def upload_diarize():
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'diarize', filename)
         file.save(file_path)
         
-        attendees = []
-        if is_video_file(filename):
-            attendees = process_video_for_attendees(file_path)
-            audio_filename = f"{os.path.splitext(filename)[0]}.wav"
-            audio_path = os.path.join(app.config['UPLOAD_FOLDER'], 'diarize', audio_filename)
-            if extract_audio(file_path, audio_path):
-                os.remove(file_path)  # Remove the original video file
-                message = "Video file processed and audio extracted successfully for Diarize!"
-                if attendees:
-                    message += f" Found {len(attendees)} attendees."
-                return render_template('upload.html', message=message, attendees=attendees)
-            else:
-                return render_template('upload.html', message="Error processing video file. Please try again.")
-        
+        logger.info(f"File uploaded successfully for Diarize: {filename}")
         return render_template('upload.html', message="File uploaded successfully to Diarize!")
     return render_template('upload.html', message="Invalid file type. Please upload an allowed audio or video file.")
 
