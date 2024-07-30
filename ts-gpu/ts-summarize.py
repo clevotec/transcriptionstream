@@ -35,11 +35,13 @@ with open('prompts.yaml', 'r') as file:
     # Get the summarization prompt template
     summarization_prompt_template = prompts['summarization_prompt']
 
+# Insert the transcription_text into the prompt template
+filled_prompt = summarization_prompt_template.format(transcription_text=transcription_text)
 
 # JSON payload
 payload = {
     "model": "llama3.1:70b",
-    "prompt": summarization_prompt_template,
+    "prompt": filled_prompt,
     "stream": False,
     "keep_alive": "5s"
 }
