@@ -11,6 +11,10 @@
             padding: 20px;
             cursor: pointer;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
         }
         .progress-bar {
             width: 100%;
@@ -111,6 +115,7 @@
                     <span class="progress-bar-fill" style="width: 0%;"></span>
                 </div>
             </form>
+            <br>
             <form id="diarizeForm" action="/upload_diarize" method="POST" enctype="multipart/form-data" class="dropzone">
                 <label for="diarizeInput">Upload for Diarize:</label>
                 <input type="file" name="file" id="diarizeInput" required accept="audio/*,video/*,.mkv,.mp4,.avi,.mov,.wmv">
