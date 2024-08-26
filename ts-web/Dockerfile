@@ -3,6 +3,8 @@
 # Use an official Python runtime as a parent image
 FROM python:3.8-slim-buster
 
+RUN apt update && apt install -y ffmpeg libsm6 libxext6 tesseract-ocr tesseract-ocr-eng
+
 # Set the working directory in the docker image
 WORKDIR /ts-web
 

@@ -30,7 +30,7 @@ with open(txt_file_path, 'r', encoding='utf-8') as file:
     transcription_text = file.read()
 
 # Load the summarization_prompt template from prompts.yaml
-with open('prompts.yaml', 'r') as file:
+with open('/root/scripts/prompts.yaml', 'r') as file:
     prompts = yaml.safe_load(file)
     # Get the summarization prompt template
     summarization_prompt_template = prompts['summarization_prompt']
@@ -43,12 +43,14 @@ payload = {
     "model": "llama3.1:70b",
     "prompt": filled_prompt,
     "stream": False,
-    "keep_alive": "5s"
+    "keep_alive": "5s",
+    "options": {
+        "num_ctx": 32768
+    }
 }
 
 # Try to send a GET request to check if the API is running
 try:
-    print("API_BASE_URL: ", api_base_url)
     api_response = requests.get(api_base_url, timeout=5)
     if api_response.status_code == 200 and api_response.text == "Ollama is running":
         print("API endpoint is running.")

@@ -3,11 +3,6 @@ from werkzeug.utils import secure_filename
 import os
 import shutil
 from datetime import datetime
-import ffmpeg
-import cv2
-import pytesseract
-from moviepy.editor import VideoFileClip
-import re
 import logging
 
 # Configure logging

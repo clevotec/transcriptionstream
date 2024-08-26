@@ -50,13 +50,13 @@ if [ "$answer" != "${answer#[Yy]}" ] ;then
 
     # Start the docker-compose services
     echo "Starting services with docker-compose..."
-    docker-compose up --detach
+    docker-compose --env-file .env up --detach
 
 #Uncomment to enable ts-gpu local ollama container running mistral
    # Get the model installed on ts-gpt (requires curl)
    # only if ollama is enabled in docker-compose.yaml
     echo "Downloading  transcriptionstream mistral model"   
-    curl -X POST http://172.30.1.3:11434/api/pull -d '{"name": "transcriptionstream/transcriptionstream"}'
+    curl -X POST http://$OLLAMA_ENDPOINT_IP:11434/api/pull -d '{"name": "transcriptionstream/transcriptionstream"}'
 
     # Re-attach to compose logs
     echo "Re-attaching to console logs"

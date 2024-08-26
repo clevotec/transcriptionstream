@@ -21,6 +21,8 @@ RUN apt-get update && apt-get install -y \
     python3-wheel \
 #    nvidia-cuda-toolkit \
 #    nvidia-cuda-toolkit-gcc \
+    tesseract-ocr \
+    tesseract-ocr-eng \
     tzdata \
  && rm -rf /var/lib/apt/lists/*
 
@@ -36,7 +38,7 @@ WORKDIR /whisper-diarization
 RUN pip install -r requirements.txt
 
 # Install req for calls to ts-meilisearch
-RUN pip install meilisearch
+RUN pip install meilisearch ffmpeg-python opencv-python pytesseract moviepy
 
 # Copy the required files
 COPY ts-control.sh /root/scripts/
@@ -45,6 +47,8 @@ COPY test.wav /home/transcriptionstream/
 COPY ts-summarize.py /root/scripts/
 COPY index-single.py /root/scripts/
 COPY auto-summary.py /root/scripts/
+COPY prompts.yaml /root/scripts/
+COPY meeting_attendee_detection.py /root/scripts/
 
 # Create a new user and setup the environment
 RUN useradd -m -p $(openssl passwd -1 nomoresaastax) transcriptionstream \
@@ -54,6 +58,8 @@ RUN useradd -m -p $(openssl passwd -1 nomoresaastax) transcriptionstream \
  && mkdir -p /home/transcriptionstream/incoming/transcribe \
  && chown -R transcriptionstream:transcriptionstream /home/transcriptionstream/ \
  && sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+
+ RUN pip uninstall huggingface_hub; pip install huggingface-hub==0.20.3
 
 # Run the necessary scripts so we have our transcription models IN the image. Adds to build time for download.
 RUN python3 diarize.py -a /home/transcriptionstream/test.wav
