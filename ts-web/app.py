@@ -1,8 +1,13 @@
-from flask import Flask, render_template, request, jsonify, session, send_file
+from flask import Flask, render_template, request, jsonify, session, send_file, redirect
 from werkzeug.utils import secure_filename
 import os
 import shutil
 from datetime import datetime
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 # Use the TS_WEB_SECRET_KEY environment variable as the secret key, and the fallback
@@ -10,7 +15,7 @@ app.secret_key = os.environ.get('TS_WEB_SECRET_KEY', 'some_secret_key')
 
 TRANSCRIBED_FOLDER = '/transcriptionstream/transcribed'
 UPLOAD_FOLDER = '/transcriptionstream/incoming'
-ALLOWED_EXTENSIONS = set(['mp3', 'wav', 'ogg', 'flac'])
+ALLOWED_EXTENSIONS = set(['mp3', 'wav', 'ogg', 'flac', 'mkv', 'mp4', 'avi', 'mov', 'wmv'])
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -19,7 +24,6 @@ session_start_time = datetime.now()
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 
 @app.route('/')
 def index():
@@ -85,10 +89,14 @@ def upload_transcribe():
     file = request.files['file']
     if file.filename == '':
         return redirect(request.url)
-    if file:
+    if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], 'transcribe', filename))
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'transcribe', filename)
+        file.save(file_path)
+        
+        logger.info(f"File uploaded successfully for Transcribe: {filename}")
         return render_template('upload.html', message="File uploaded successfully to Transcribe!")
+    return render_template('upload.html', message="Invalid file type. Please upload an allowed audio or video file.")
 
 @app.route('/upload_diarize', methods=['POST'])
 def upload_diarize():
@@ -97,10 +105,14 @@ def upload_diarize():
     file = request.files['file']
     if file.filename == '':
         return redirect(request.url)
-    if file:
+    if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], 'diarize', filename))
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'diarize', filename)
+        file.save(file_path)
+        
+        logger.info(f"File uploaded successfully for Diarize: {filename}")
         return render_template('upload.html', message="File uploaded successfully to Diarize!")
+    return render_template('upload.html', message="Invalid file type. Please upload an allowed audio or video file.")
 
 
 @app.route('/check_alert', methods=['GET'])

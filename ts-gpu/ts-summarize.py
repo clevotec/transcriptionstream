@@ -4,6 +4,7 @@ import os
 import requests
 import subprocess
 import re
+import yaml
 
 # Check if both a folder path and API base URL were provided as command line arguments
 if len(sys.argv) < 3:
@@ -28,31 +29,24 @@ if not os.path.exists(txt_file_path):
 with open(txt_file_path, 'r', encoding='utf-8') as file:
     transcription_text = file.read()
 
-# The text for the prompt
-prompt_text = f"""
-Summarize the transcription below. Be sure to include pertinent information about the speakers, including name and anything else shared.
-Provide the summary output in the following style
+# Load the summarization_prompt template from prompts.yaml
+with open('/root/scripts/prompts.yaml', 'r') as file:
+    prompts = yaml.safe_load(file)
+    # Get the summarization prompt template
+    summarization_prompt_template = prompts['summarization_prompt']
 
-Speakers: names or identifiers of speaking parties
-Topics: topics included in the transcription
-Ideas: any ideas that may have been mentioned
-Dates: dates mentioned and what they correspond to
-Locations: any locations mentioned
-Action Items: any action items
+# Insert the transcription_text into the prompt template
+filled_prompt = summarization_prompt_template.format(transcription_text=transcription_text)
 
-Summary: overall summary of the transcription
-
-The transcription is as follows
-
-{transcription_text}
-
-"""
 # JSON payload
 payload = {
-    "model": "transcriptionstream/transcriptionstream",
-    "prompt": prompt_text,
+    "model": "llama3.1:70b",
+    "prompt": filled_prompt,
     "stream": False,
-    "keep_alive": "5s"
+    "keep_alive": "5s",
+    "options": {
+        "num_ctx": 32768
+    }
 }
 
 # Try to send a GET request to check if the API is running

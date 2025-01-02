@@ -18,7 +18,7 @@ if [ "$answer" != "${answer#[Yy]}" ] ;then
 
     # Start the docker-compose services
     echo "Starting services with docker-compose..."
-    docker-compose -f docker-compose-nobuild.yml up --detach
+    docker-compose -f docker-compose-nobuild.yml --env-file .env up --detach
 
 # If running ts-gpt ollama container, enable this
 #    # Get the model installed on ts-gpt (requires curl)
