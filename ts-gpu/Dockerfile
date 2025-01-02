@@ -42,14 +42,8 @@ RUN pip install -r requirements.txt
 RUN pip install meilisearch ffmpeg-python opencv-python pytesseract moviepy
 
 # Copy the required files
-COPY ts-control.sh /root/scripts/
-COPY transcribe_example_d.sh /root/scripts/transcribe_example.sh
+COPY transcriptionstream /root/scripts
 COPY test.wav /home/transcriptionstream/
-COPY ts-summarize.py /root/scripts/
-COPY index-single.py /root/scripts/
-COPY auto-summary.py /root/scripts/
-COPY prompts.yaml /root/scripts/
-COPY meeting_attendee_detection.py /root/scripts/
 
 # Create a new user and setup the environment
 RUN useradd -m -p $(openssl passwd -1 nomoresaastax) transcriptionstream \
