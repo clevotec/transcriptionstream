@@ -6,9 +6,10 @@ import re
 
 # Get the MEILI_MASTER_KEY from the environment variable
 meili_master_key = os.getenv('MEILI_MASTER_KEY')
+meili_host = os.getenv('MEILI_HOST', 'http://meilisearch:7700')
 
 # MeiliSearch setup
-meili_client = Client('http://172.30.1.12:7700', meili_master_key)
+meili_client = Client(meili_host, meili_master_key)
 index = meili_client.index('transcriptions')
 
 def is_meilisearch_responsive(url):
@@ -37,7 +38,7 @@ def read_file(file_path):
 
 def index_data(base_path):
     # Check if MeiliSearch API is responsive
-    if not is_meilisearch_responsive('http://172.30.1.12:7700'):
+    if not is_meilisearch_responsive(meili_host):
         print("MeiliSearch API is not responsive. Exiting.")
         return
 

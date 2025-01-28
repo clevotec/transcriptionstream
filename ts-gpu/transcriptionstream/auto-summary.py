@@ -9,7 +9,7 @@ def scan_and_summarize(base_directory):
     gid = grp.getgrnam('transcriptionstream').gr_gid
 
     # Get the OLLAMA_ENDPOINT_IP from environment variables, and fallback default
-    ollama_endpoint_ip = os.environ.get('OLLAMA_ENDPOINT_IP', '172.30.1.3')
+    ollama_endpoint = os.environ.get('OLLAMA_ENDPOINT_IP', 'ollama:11434')
 
     # Iterate through all items in the base directory
     for item in os.listdir(base_directory):
@@ -31,11 +31,12 @@ def scan_and_summarize(base_directory):
                         # Print message indicating creation of summary.txt for each .txt file
                         print(f"Creating summary.txt for {txt_file} in {path}")
                         # Call the external script with the directory path and the URL
-                        command = f'python3 /root/scripts/ts-summarize.py {path} http://{ollama_endpoint_ip}:11434'
+                        command = f'python3 /root/scripts/ts-summarize.py {path} http://{ollama_endpoint}'
                         subprocess.run(command, shell=True)
 
                         # Change the ownership of the new summary.txt file
                         os.chown(summary_file, uid, gid)
+                        
 
 # Example usage
 scan_and_summarize('/transcriptionstream/transcribed')

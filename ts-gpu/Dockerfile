@@ -27,19 +27,16 @@ RUN apt-get update && apt-get install -y \
  && rm -rf /var/lib/apt/lists/*
 
 # added to fix sox/numpy error while installing whisper-diarization 03/24/2024
-RUN pip install typing_extensions
-RUN pip install numpy
+RUN pip install typing_extensions && pip install numpy
 
 # Clone only the necessary branch or commit of whisper-diarization to reduce size
-RUN git clone --depth 1 https://github.com/transcriptionstream/whisper-diarization.git
+RUN git clone --depth 1 https://github.com/clevotec/whisper-diarization.git
 
 # Install whisper-diarization requirements
 WORKDIR /whisper-diarization
-RUN pip install huggingface-hub==0.23.2
-RUN pip install -r requirements.txt
-
-# Install req for calls to ts-meilisearch
-RUN pip install meilisearch ffmpeg-python opencv-python pytesseract moviepy
+RUN pip install huggingface-hub==0.23.2 &&\
+    pip install -r requirements.txt &&\
+    pip install meilisearch ffmpeg-python opencv-python pytesseract moviepy
 
 # Copy the required files
 COPY transcriptionstream /root/scripts
@@ -49,8 +46,6 @@ COPY test.wav /home/transcriptionstream/
 RUN useradd -m -p $(openssl passwd -1 nomoresaastax) transcriptionstream \
  && mkdir -p /home/transcriptionstream/incoming \
  && mkdir -p /home/transcriptionstream/transcribed \
- && mkdir -p /home/transcriptionstream/incoming/diarize \
- && mkdir -p /home/transcriptionstream/incoming/transcribe \
  && chown -R transcriptionstream:transcriptionstream /home/transcriptionstream/ \
  && sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 
