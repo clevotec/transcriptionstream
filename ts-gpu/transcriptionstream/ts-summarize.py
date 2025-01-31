@@ -40,7 +40,7 @@ filled_prompt = summarization_prompt_template.format(transcription_text=transcri
 
 # JSON payload
 payload = {
-    "model": "llama3.1:70b",
+    "model": "llama3.1:latest",
     "prompt": filled_prompt,
     "stream": False,
     "keep_alive": "5s",
@@ -58,7 +58,7 @@ try:
         print("Invalid response from API endpoint")
         sys.exit(1)
 except requests.ConnectionError as e:
-    print("Ollama connection error: API endpoint down. Moving along.")
+    print(f"Ollama connection error: API endpoint {api_base_url} down. Moving along.")
     sys.exit(1)
 except requests.Timeout as e:
     print("Ollama request timed out: API endpoint down. Moving along..")

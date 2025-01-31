@@ -11,7 +11,7 @@
 # Define the root directory and subdirectories
 root_dir="/transcriptionstream/incoming/"
 transcribed_dir="/transcriptionstream/transcribed/"
-sub_dirs=("diarize" "transcribe")
+sub_dirs=("diarize")
 
 # Define supported audio file extensions
 audio_extensions=("wav" "mp3" "flac" "ogg")
