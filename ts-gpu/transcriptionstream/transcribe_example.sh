@@ -63,16 +63,17 @@ for sub_dir in "${sub_dirs[@]}"; do
             # Get the base name of the file (without the extension)
             base_name=$(basename "$file" ."$ext")
 
-            # Create a new subdirectory in the transcribed directory
+            # Create a new subdirectory in the /tmp directory
             new_dir="$transcribed_dir$base_name"
-            mkdir -p "$new_dir"
+            tmp_dir="/tmp/$sub_dir/$base_name"
+            mkdir -p "$tmp_dir"
 
             # Check if the file is a video
             if is_video_file "$file"; then
                 echo "--- processing video file $file..." >> /proc/1/fd/1
-                audio_file="$new_dir/$base_name.wav"
+                audio_file="$tmp_dir/$base_name.wav"
                 extract_audio "$file" "$audio_file"
-                process_video_for_attendees "$file" "$new_dir"
+                process_video_for_attendees "$file" "$tmp_dir"
                 file="$audio_file"  # Set file to the extracted audio for further processing
             else
                 audio_file="$file"
@@ -88,30 +89,33 @@ for sub_dir in "${sub_dirs[@]}"; do
             elif [ "$sub_dir" == "transcribe" ]; then
                 echo "--- transcribing $audio_file..." >> /proc/1/fd/1
                 whisper_start_time=$(date +%s)
-                whisperx --batch_size 12 --model $TRANSCRIPTION_MODEL --language en --output_dir "$new_dir" > "$new_dir/$base_name.txt" "$audio_file"
+                whisperx --batch_size 12 --model $TRANSCRIPTION_MODEL --language en --output_dir "$tmp_dir" > "$tmp_dir/$base_name.txt" "$audio_file"
                 whisper_end_time=$(date +%s)
                 run_time=$((whisper_end_time - whisper_start_time))
             fi
 
-            # Modify $new_dir/$base_name.txt to remove lines that start with the following strings
-            sed -i '/^Model was trained with pyannote\.audio/d' "$new_dir/$base_name.txt"
-            sed -i '/^Model was trained with torch/d' "$new_dir/$base_name.txt"
-            sed -i '/^\[NeMo\]/d' "$new_dir/$base_name.txt"
-            sed -i '/^torchvision is not available/d' "$new_dir/$base_name.txt"
+            # Modify $tmp_dir/$base_name.txt to remove lines that start with the following strings
+            sed -i '/^Model was trained with pyannote\.audio/d' "$tmp_dir/$base_name.txt"
+            sed -i '/^Model was trained with torch/d' "$tmp_dir/$base_name.txt"
+            sed -i '/^\[NeMo\]/d' "$tmp_dir/$base_name.txt"
+            sed -i '/^torchvision is not available/d' "$tmp_dir/$base_name.txt"
 
             # Move all files with the same base_name to the new subdirectory
-            mv "$incoming_dir$base_name"* "$new_dir/"
+            mv "$incoming_dir$base_name"* "$tmp_dir/"
+            # Copy everything from $tmp_dir to $new_dir
+            # cp -r "$tmp_dir"/* "$new_dir/"
 
             # Change the owner of the files to the user transcriptionstream
-            chown -R transcriptionstream:transcriptionstream "$new_dir"
+            # chown -R transcriptionstream:transcriptionstream "$tmp_dir"
 
             # Drop messages to the console
-            echo "--- done processing $file - output placed in $new_dir" >> /proc/1/fd/1
-            if [[ -f "$new_dir/$base_name.txt" ]]; then
-                echo "transcription: $(cat "$new_dir/$base_name.txt") " >> /proc/1/fd/1
+            echo "--- done processing $file - output placed in $tmp_dir" >> /proc/1/fd/1
+            if [[ -f "$tmp_dir/$base_name.txt" ]]; then
+                echo "transcription: $(cat "$tmp_dir/$base_name.txt") " >> /proc/1/fd/1
                 echo "Runtime for processing $file = $run_time" >> /proc/1/fd/1
                 echo "------------------------------------"
             fi
+
         done
     done
 done

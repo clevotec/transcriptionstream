@@ -43,7 +43,8 @@ while true
 do
   # Check and start process1 if allowed
   start_process_if_allowed $process1 $maxConcurrentRuns1
-
+  # Sleep to allow script to finish
+  sleep 5
   # Check and start process2 if allowed
   start_process_if_allowed $process2 $maxConcurrentRuns2
 

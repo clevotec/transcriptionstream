@@ -87,7 +87,14 @@ def scan_and_summarize(base_directory):
                             doc.save(doc_file)  
                             
                             os.chown(doc_file, uid, gid)
+                            
+                            # copy all files to new dir
+                            for file in os.listdir(path):
+                                if not file.endswith('.txt') and not file.endswith('.srt') and not file.endswith('.docx'):
+                                    print(f"Copying {file} to {path}")
+                                    shutil.copy(os.path.join(path, file), os.path.join(path, file))
                         
 
 # Example usage
-scan_and_summarize('/transcriptionstream/transcribed')
+# scan_and_summarize('/transcriptionstream/transcribed')
+scan_and_summarize('/tmp/transcribed')
