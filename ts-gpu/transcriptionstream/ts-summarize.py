@@ -40,7 +40,7 @@ filled_prompt = summarization_prompt_template.format(transcription_text=transcri
 
 # JSON payload
 payload = {
-    "model": "llama3.1:latest",
+    "model": "r1-1776:70b",
     "prompt": filled_prompt,
     "stream": False,
     "keep_alive": "5s",
